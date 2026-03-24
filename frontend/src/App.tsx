@@ -1,8 +1,16 @@
+import { Route, Routes } from 'react-router'
+import { Toaster } from 'sonner'
+import Auth from './pages/Auth/Auth'
+import Chat from './pages/Chat/Chat'
 
 const App: React.FC = () => {
   return (
     <>
-      Welcome to my chat app
+      <Toaster richColors position="top-right" />
+      <Routes>
+        <Route path="/" element={<Auth />} />
+        <Route path="/chat" element={<Chat />} />
+      </Routes>
     </>
   )
 }
