@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
-import User from "../models/User"
-import generateUniqueConnectCode from "../utils/generateUniqueConnectCode"
+import User from "../models/User.js"
+import generateUniqueConnectCode from "../utils/generateUniqueConnectCode.js"
 
 const generateToken = (userId) => {
     return jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
@@ -132,6 +132,21 @@ class AuthController {
             });
         } catch (error) {
             console.log("Me error", error);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    static async logout(req, res) {
+        try {
+            res.clearCookie("jwt", {
+                httpOnly: true,
+                sameSite: "strict",
+                secure: process.env.NODE_ENV !== "development",
+            });
+
+            res.status(200).json({ message: "Logged out successfully" });
+        } catch (error) {
+            console.log("Logout error", error);
             res.status(500).json({ message: "Internal server error" });
         }
     }
