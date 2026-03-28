@@ -5,6 +5,7 @@ import authMiddleware from "../middleware/authMiddleware.js"
 const router = express.Router();
 
 router.get('/check-connect-code', authMiddleware, ConversationController.checkConnectCode);
+router.post('/connect', authMiddleware, ConversationController.connectFriend);
 router.get('/', authMiddleware, ConversationController.getConversations);
 
 export default router;

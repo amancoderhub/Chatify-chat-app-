@@ -9,6 +9,15 @@ const generateToken = (userId) => {
     });
 };
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const authCookieOptions = {
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
+};
+
 class AuthController {
     static async register(req, res){
         try{
@@ -44,12 +53,7 @@ class AuthController {
 
                 const token = generateToken(user.id);
 
-                res.cookie("jwt", token, {
-                    maxAge: 7 * 24 * 60 * 60 * 1000,
-                    httpOnly: true,
-                    sameSite: "strict",
-                    secure: process.env.NODE_ENV !== "development",
-                });
+                res.cookie("jwt", token, authCookieOptions);
 
                 res.status(201).json({
                     user: {
@@ -91,12 +95,7 @@ class AuthController {
                 expiresIn: '7d'
             });
 
-            res.cookie("jwt", token, {
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-                httpOnly: true,
-                sameSite: "strict",
-                secure: process.env.NODE_ENV !== "development",
-            });
+            res.cookie("jwt", token, authCookieOptions);
 
             res.status(200).json({
                 user: {
@@ -140,8 +139,8 @@ class AuthController {
         try {
             res.clearCookie("jwt", {
                 httpOnly: true,
-                sameSite: "strict",
-                secure: process.env.NODE_ENV !== "development",
+                sameSite: isProduction ? "none" : "lax",
+                secure: isProduction,
             });
 
             res.status(200).json({ message: "Logged out successfully" });

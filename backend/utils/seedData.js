@@ -36,23 +36,36 @@ async function seed() {
                 username: "saurbh6",
                 email: "saurbhsrivastav6@gmail.com",
                 connectCode: "343827",
-                password: "password",
             },
             {
                 fullName: "Bob",
                 username: "bob",
                 email: "test2@test.com",
                 connectCode: "222222",
-                password: "password",
+            },
+            {
+                fullName: "Abhinandan",
+                username: "abhinandnraj",
+                email: "abhinandan@gmail.com",
+                connectCode: "103077",
             },
         ];
 
         // create users
         const users = [];
-        const hashPassword = await bcrypt.hash("password", 10);
 
         for (const data of usersData) {
-            data.password = hashPassword;
+            const passwordInput = data.password ?? "password";
+
+            if (typeof passwordInput !== "string") {
+                throw new Error(`Invalid password for user ${data.username}`);
+            }
+
+            if (passwordInput.startsWith("$2")) {
+                data.password = passwordInput;
+            } else {
+                data.password = await bcrypt.hash(passwordInput, 10);
+            }
             const user = await User.create(data);
             console.log(`User created ${user.fullName} (${user.id})`);
             users.push(user);

@@ -3,14 +3,28 @@ import Friendship from "../models/Friendship.js";
 import User from "../models/User.js";
 
 class ConversationController {
+    static async resolveFriendFromCode(userId, connectCode) {
+        const friend = await User.findOne({ connectCode });
+
+        if (!friend || friend._id.toString() === userId.toString()) {
+            return null;
+        }
+
+        return friend;
+    }
+
     static async checkConnectCode(req, res) {
         try {
             const userId = req.user._id;
             const { connectCode } = req.query;
 
-            const friend = await User.findOne({ connectCode });
+            if (!connectCode || typeof connectCode !== "string") {
+                return res.status(400).json({ message: "Connect code is required" });
+            }
 
-            if (!friend || friend._id.toString() === userId.toString()) {
+            const friend = await ConversationController.resolveFriendFromCode(userId, connectCode);
+
+            if (!friend) {
                 return res.status(400).json({ message: "Invalid connect ID" });
             }
 
@@ -32,6 +46,77 @@ class ConversationController {
         } catch (error) {
             console.error("Error checking connect code", error);
             res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
+    static async connectFriend(req, res) {
+        try {
+            const userId = req.user._id;
+            const { connectCode } = req.body;
+
+            if (!connectCode || typeof connectCode !== "string") {
+                return res.status(400).json({ message: "Connect code is required" });
+            }
+
+            const friend = await ConversationController.resolveFriendFromCode(userId, connectCode.trim());
+
+            if (!friend) {
+                return res.status(400).json({ message: "Invalid connect ID" });
+            }
+
+            let friendship = await Friendship.findOne({
+                $or: [
+                    { requester: userId, recipient: friend._id },
+                    { requester: friend._id, recipient: userId },
+                ],
+            });
+
+            if (!friendship) {
+                friendship = await Friendship.create({
+                    requester: userId,
+                    recipient: friend._id,
+                });
+            }
+
+            let conversation = await Conversation.findOne({
+                participants: {
+                    $all: [userId, friend._id],
+                    $size: 2,
+                },
+            });
+
+            if (!conversation) {
+                conversation = await Conversation.create({
+                    participants: [userId, friend._id],
+                    lastMessagePreview: null,
+                    unreadCounts: {
+                        [userId.toString()]: 0,
+                        [friend._id.toString()]: 0,
+                    },
+                });
+            }
+
+            return res.status(201).json({
+                message: "Friend added successfully",
+                data: {
+                    friendshipId: friendship.id,
+                    conversationId: conversation.id,
+                    friend: {
+                        id: friend.id,
+                        username: friend.username,
+                        fullName: friend.fullName,
+                        connectCode: friend.connectCode,
+                        online: false,
+                    },
+                },
+            });
+        } catch (error) {
+            if (error?.code === 11000) {
+                return res.status(400).json({ message: "Friendship already exists" });
+            }
+
+            console.error("Error connecting friend", error);
+            return res.status(500).json({ message: "Internal server error" });
         }
     }
 
@@ -83,7 +168,7 @@ class ConversationController {
 
             // create conversations response data
             const conversationsData = await Promise.all(
-            ...friendships.map(async (friendship) => {
+                friendships.map(async (friendship) => {
                     const isRequester =
                         friendship.requester._id.toString() === userId.toString();
                     const friend = isRequester
