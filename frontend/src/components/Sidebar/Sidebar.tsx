@@ -6,7 +6,7 @@ import { ConversationsProvider } from "../../contexts/ConversationsContext";
 
 const Sidebar: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white border-r border-gray-200 flex flex-col">
+    <div className="flex h-dvh min-h-0 flex-col border-r border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <Header />
       <ConversationsProvider>
         <SearchBar />

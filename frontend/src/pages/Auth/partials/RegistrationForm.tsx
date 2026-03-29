@@ -26,9 +26,11 @@ const registerSchema = z
           "Username can only contain lowercase letters, numbers, and underscores",
       })
       .transform((value) => value.toLowerCase()),
-    email: z.email({ message: "Invalid email address" }).transform((value) =>
-      value.toLowerCase(),
-    ),
+    email: z
+      .string()
+      .trim()
+      .email({ message: "Invalid email address" })
+      .transform((value) => value.toLowerCase()),
     password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters long" }),
@@ -87,7 +89,7 @@ const RegistrationForm = ({ onSwitchToLogin }: RegistrationFormProps) => {
   };
 
   return (
-    <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-lg">
+    <div className="w-full max-w-md rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-8">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-bold text-slate-900">Create account</h2>
         <p className="mt-2 text-sm text-slate-500">

@@ -7,6 +7,7 @@ export type User = {
     username: string;
     connectCode: string;
     email: string;
+    online: boolean;
 }
 
 interface AuthState {

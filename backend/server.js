@@ -14,6 +14,7 @@ import authRoutes from "./routes/authRoutes.js";
 import conversationRoutes from "./routes/conversationRoutes.js";
 import { initializeSocket } from "./socket.js";
 import { socketAuthMiddleware } from "./socket/socketAuthMiddleware.js";
+import redisService from "./services/RedisService.js";
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -42,9 +43,33 @@ io.use(socketAuthMiddleware);
 
 await initializeSocket(io);
 
+const shutdown = async (signal) => {
+    console.log(`${signal} received. Shutting down gracefully...`);
+
+    try {
+        await redisService.disconnect();
+
+        httpServer.close(() => {
+            console.log("HTTP server closed");
+            process.exit(0);
+        });
+    } catch (error) {
+        console.error("Error during shutdown", error);
+        process.exit(1);
+    }
+};
+
+process.on("SIGINT", () => {
+    void shutdown("SIGINT");
+});
+
+process.on("SIGTERM", () => {
+    void shutdown("SIGTERM");
+});
+
 try{
     await connectDB();
-
+    await redisService.initialize();
 
     const PORT = process.env.PORT || 4000;
     httpServer.listen(PORT, () =>{

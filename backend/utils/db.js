@@ -5,7 +5,7 @@ export const connectDB = async () => {
     if(!uri) throw new Error("MONGO_URI is not set");
 
     try{
-        await mongoose.connect(uri, {dbName: 'chat-app'})
+        await mongoose.connect(uri)
         console.log("MongoDB connected!")
     }catch(error){
         console.error("MongoDB connection error", error);

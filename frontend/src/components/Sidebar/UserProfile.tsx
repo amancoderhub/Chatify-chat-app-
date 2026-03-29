@@ -21,20 +21,20 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <div className="p-4 border-t border-gray-200 flex items-center space-x-3">
+    <div className="flex items-center gap-3 border-t border-slate-200 bg-white px-4 py-4 sm:px-5">
       <div className="flex size-10 items-center justify-center rounded-full bg-sky-100 text-sky-600">
         <UserCircle2 className="size-8" />
       </div>
       <div className="min-w-0 flex-1">
-        <h2 className="font-semibold truncate text-sm">
+        <h2 className="truncate text-sm font-semibold text-slate-900">
           {user?.username ?? "User"}{user?.connectCode ? ` (${user.connectCode})` : ""}
         </h2>
-        <p className="text-xs text-gray-500">Online</p>
+        <p className="truncate text-xs text-slate-500">{user?.email ?? "Online"}</p>
       </div>
       <button
         type="button"
         onClick={() => void logoutUser()}
-        className="text-gray-500 hover:text-gray-700 cursor-pointer"
+        className="cursor-pointer rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
       >
         <LogOut className="size-4" />
       </button>

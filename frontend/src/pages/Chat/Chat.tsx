@@ -5,11 +5,11 @@ import { SocketProvider } from "../../contexts/SocketContext";
 const Chat: React.FC = () => {
   return (
     <SocketProvider>
-      <div className="min-h-screen bg-gray-100 flex">
-        <div className="w-full sm:w-1/3 max-w-md min-h-screen">
+      <div className="flex min-h-dvh bg-slate-100">
+        <div className="w-full min-w-0 lg:w-[360px] lg:min-w-[320px] lg:max-w-[380px]">
           <Sidebar />
         </div>
-        <div className="hidden sm:flex flex-1 min-h-screen">
+        <div className="hidden min-w-0 flex-1 lg:flex">
           <ChatWindow />
         </div>
       </div>

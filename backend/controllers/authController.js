@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
 import generateUniqueConnectCode from "../utils/generateUniqueConnectCode.js"
+import redisService from "../services/RedisService.js"
 
 const generateToken = (userId) => {
     return jwt.sign({ userId: userId }, process.env.JWT_SECRET, {
@@ -22,7 +23,11 @@ class AuthController {
     static async register(req, res){
         try{
                 const {fullName, username, email, password} = req.body;
-                if(!fullName || !username || !email || !password){
+                const normalizedFullName = fullName?.trim();
+                const normalizedUsername = username?.trim().toLowerCase();
+                const normalizedEmail = email?.trim().toLowerCase();
+
+                if(!normalizedFullName || !normalizedUsername || !normalizedEmail || !password){
                     return res.status(400).json({message : "All fields are required"});
                 }
                 if(password.length<6){
@@ -30,7 +35,7 @@ class AuthController {
                 }
 
                 const existingUser = await User.findOne({
-                    $or: [{username}, {email}]
+                    $or: [{ username: normalizedUsername }, { email: normalizedEmail }]
                 });
 
                 if(existingUser){
@@ -42,9 +47,9 @@ class AuthController {
                 const hashedPassword = await bcrypt.hash(password, salt);
 
                 const user = new User({
-                    username,
-                    fullName,
-                    email,
+                    username: normalizedUsername,
+                    fullName: normalizedFullName,
+                    email: normalizedEmail,
                     password: hashedPassword,
                     connectCode:await generateUniqueConnectCode(),
                 });
@@ -62,6 +67,7 @@ class AuthController {
                         fullName: user.fullName,
                         email: user.email,
                         connectCode: user.connectCode,
+                        online: await redisService.isUserOnline(user._id.toString()),
                     },
                 });
         }
@@ -74,12 +80,13 @@ class AuthController {
     static async login(req, res) {
         try {
             const { email, password } = req.body;
+            const normalizedEmail = email?.trim().toLowerCase();
 
-            if (!email || !password) {
+            if (!normalizedEmail || !password) {
                 return res.status(400).json({ message: "Email and password are required" });
             }
 
-            const user = await User.findOne({ email });
+            const user = await User.findOne({ email: normalizedEmail });
 
             if (!user) {
                 return res.status(400).json({ message: "Invalid credentials" });
@@ -104,6 +111,7 @@ class AuthController {
                     fullName: user.fullName,
                     email: user.email,
                     connectCode: user.connectCode,
+                    online: await redisService.isUserOnline(user._id.toString()),
                 },
             });
         } catch (error) {
@@ -127,6 +135,7 @@ class AuthController {
                     fullName: user.fullName,
                     email: user.email,
                     connectCode: user.connectCode,
+                    online: await redisService.isUserOnline(user._id.toString()),
                 },
             });
         } catch (error) {

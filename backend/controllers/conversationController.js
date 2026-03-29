@@ -1,6 +1,7 @@
 import Conversation from "../models/Conversation.js";
 import Friendship from "../models/Friendship.js";
 import User from "../models/User.js";
+import redisService from "../services/RedisService.js";
 
 class ConversationController {
     static async resolveFriendFromCode(userId, connectCode) {
@@ -106,7 +107,7 @@ class ConversationController {
                         username: friend.username,
                         fullName: friend.fullName,
                         connectCode: friend.connectCode,
-                        online: false,
+                        online: await redisService.isUserOnline(friend._id.toString()),
                     },
                 },
             });
@@ -192,7 +193,7 @@ class ConversationController {
                             username: friend.username,
                             fullName: friend.fullName,
                             connectCode: friend.connectCode,
-                            online: false,
+                            online: await redisService.isUserOnline(friend._id.toString()),
                         },
                     };
                 })

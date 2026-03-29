@@ -51,9 +51,9 @@ const ConversationItem: React.FC<Conversation> = ({
     const displayTime = formatDisplayTime(lastMessage?.timestamp);
 
     return (
-        <div className="flex cursor-pointer items-center space-x-3 border-b border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50">
+        <div className="flex cursor-pointer items-center gap-3 border-b border-slate-100 px-4 py-3.5 transition-colors hover:bg-slate-50 sm:px-5">
             <div className="relative">
-                <div className="flex size-10 items-center justify-center rounded-full bg-sky-100 text-xs font-semibold text-sky-700">
+                <div className="flex size-11 items-center justify-center rounded-full bg-sky-100 text-xs font-semibold text-sky-700">
                     {initials}
                 </div>
                 <div
@@ -64,13 +64,13 @@ const ConversationItem: React.FC<Conversation> = ({
             </div>
 
             <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                    <h2 className="truncate text-sm font-semibold text-gray-900">
+                <div className="flex items-start justify-between gap-3">
+                    <h2 className="truncate text-sm font-semibold text-slate-900">
                         {friend.fullName}
                     </h2>
-                    <div className="ml-2 flex items-center gap-2">
+                    <div className="ml-2 flex shrink-0 items-center gap-2">
                         {displayTime ? (
-                            <span className="text-[11px] text-gray-400">{displayTime}</span>
+                            <span className="text-[11px] text-slate-400">{displayTime}</span>
                         ) : null}
                         {unreadCount > 0 ? (
                             <span className="rounded-full bg-sky-500 px-2 py-0.5 text-[10px] font-semibold text-white">
@@ -79,7 +79,7 @@ const ConversationItem: React.FC<Conversation> = ({
                         ) : null}
                     </div>
                 </div>
-                <p className="truncate text-xs text-gray-500">
+                <p className="truncate text-xs text-slate-500">
                     {lastMessage?.content ?? "No messages yet"}
                 </p>
             </div>
