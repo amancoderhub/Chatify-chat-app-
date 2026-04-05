@@ -7,19 +7,19 @@ const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
 
     return (
-        <div className="flex min-h-dvh w-full flex-col bg-transparent lg:flex-row">
-        <div className="flex w-full flex-col justify-center bg-linear-to-br from-sky-600 via-cyan-500 to-sky-700 px-6 py-12 text-white sm:px-10 lg:w-[45%] lg:px-12">
+        <div className="flex min-h-dvh w-full flex-col bg-slate-50 lg:flex-row">
+        <div className="flex w-full flex-col justify-center bg-linear-to-br from-sky-600 via-cyan-500 to-sky-700 px-6 py-8 text-white sm:px-10 sm:py-10 lg:w-[45%] lg:px-12 lg:py-12">
             <div className="mx-auto w-full max-w-lg text-center lg:text-left">
-            <div className="mb-6 flex justify-center lg:justify-start">
+            <div className="mb-4 flex justify-center lg:justify-start sm:mb-6">
                 <div className="rounded-3xl bg-white/15 p-4 shadow-lg ring-1 ring-white/20 backdrop-blur">
                 <Mail className="size-10 sm:size-11" />
                 </div>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Welcome to Chatty</h1>
+            <h1 className="text-2xl font-bold tracking-tight sm:text-4xl">Welcome to Chatty</h1>
             <p className="mt-3 max-w-md text-sm leading-6 text-sky-50/90 sm:text-base">
                 Connect with friends and family, anytime and anywhere.
             </p>
-            <div className="mt-8 grid gap-3 text-left text-sm text-white/90 sm:grid-cols-2">
+            <div className="mt-6 grid gap-3 text-left text-sm text-white/90 sm:mt-8 sm:grid-cols-2">
                 <div className="rounded-2xl bg-white/12 p-4 ring-1 ring-white/15">
                     Realtime presence updates
                 </div>
@@ -27,13 +27,13 @@ const Auth = () => {
                     Fast private conversations
                 </div>
             </div>
-            <div className="mt-8 text-center lg:text-left">
+            <div className="mt-6 text-center lg:text-left sm:mt-8">
                 <p className="text-sm text-white/75">Join thousands of users today.</p>
             </div>
             </div>
         </div>
 
-        <div className="flex w-full items-center justify-center px-4 py-8 sm:px-6 lg:min-h-dvh lg:w-[55%] lg:px-10">
+        <div className="flex w-full items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:min-h-dvh lg:w-[55%] lg:px-10">
             {isLogin ? (
             <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
             ) : (

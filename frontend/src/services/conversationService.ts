@@ -26,6 +26,13 @@ export const conversationService = {
         return response.data;
     },
 
+    checkConnectCode: async (connectCode: string) => {
+        const response = await apiClient.get("/conversations/check-connect-code", {
+            params: { connectCode },
+        });
+        return response.data;
+    },
+
     connectFriend: async (connectCode: string) => {
         const response = await apiClient.post("/conversations/connect", { connectCode });
         return response.data;

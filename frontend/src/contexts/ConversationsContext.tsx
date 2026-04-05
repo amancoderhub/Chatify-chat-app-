@@ -2,7 +2,6 @@ import {
     createContext,
     useEffect,
     useEffectEvent,
-    useMemo,
     useState,
     type ReactNode,
 } from "react";
@@ -28,21 +27,22 @@ type ConversationsProviderProps = {
 
 export const ConversationsProvider = ({ children }: ConversationsProviderProps) => {
     const { data, isLoading, isError } = useConversations();
+    const [conversations, setConversations] = useState<ConversationItem[]>([]);
     const [onlineStatuses, setOnlineStatuses] = useState<Record<string, boolean>>({});
     const [searchTerm, setSearchTerm] = useState("");
     const { socket } = useSocketContext();
 
-    const conversations = useMemo(
-        () =>
-            (data?.data ?? []).map((conversation) => ({
-                ...conversation,
-                friend: {
-                    ...conversation.friend,
-                    online: onlineStatuses[conversation.friend.id] ?? conversation.friend.online,
-                },
-            })),
-        [data, onlineStatuses],
-    );
+    useEffect(() => {
+        const nextConversations = (data?.data ?? []).map((conversation) => ({
+            ...conversation,
+            friend: {
+                ...conversation.friend,
+                online: onlineStatuses[conversation.friend.id] ?? conversation.friend.online,
+            },
+        }));
+
+        setConversations(nextConversations);
+    }, [data]);
 
     const filteredConversations = conversations.filter((conversation) => {
         const term = searchTerm.trim().toLowerCase();
@@ -72,20 +72,55 @@ export const ConversationsProvider = ({ children }: ConversationsProviderProps) 
     }) => {
         const currentOnline =
             onlineStatuses[friendId] ??
-            data?.data.find((conversation) => conversation.friend.id === friendId)?.friend.online;
+            conversations.find((conversation) => conversation.friend.id === friendId)?.friend.online;
 
         if (currentOnline !== online && online) {
             toast.info(`${username} is online`);
         }
 
+        setConversations((prev) =>
+            prev.map((conversation) => {
+                if (conversation.friend.id !== friendId) {
+                    return conversation;
+                }
+
+                return {
+                    ...conversation,
+                    friend: {
+                        ...conversation.friend,
+                        online,
+                    },
+                };
+            }),
+        );
         setOnlineStatuses((prev) => ({ ...prev, [friendId]: online }));
+    });
+
+    const handleNewConversation = useEffectEvent((conversation: ConversationItem) => {
+        setConversations((prev) => {
+            if (prev.some((item) => item.conversationId === conversation.conversationId)) {
+                return prev;
+            }
+
+            return [conversation, ...prev];
+        });
+
+        toast.success(`You and ${conversation.friend.username} are now friends!`);
+    });
+
+    const handleErrorNewConversation = useEffectEvent((payload: { error?: string }) => {
+        toast.error(payload.error ?? "Unable to add conversation");
     });
 
     useEffect(() => {
         socket?.on("conversation:online-status", handleConversationOnlineStatus);
+        socket?.on("conversation:accept", handleNewConversation);
+        socket?.on("conversation:request:error", handleErrorNewConversation);
 
         return () => {
             socket?.off("conversation:online-status", handleConversationOnlineStatus);
+            socket?.off("conversation:accept", handleNewConversation);
+            socket?.off("conversation:request:error", handleErrorNewConversation);
         };
     }, [socket]);
 
