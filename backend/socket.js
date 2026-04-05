@@ -1,5 +1,8 @@
 import { leaveAllRooms } from "./socket/helper.js";
-import { notifyConversationOnlineStatus } from "./socket/socketConversation.js";
+import {
+    conversationRequest,
+    notifyConversationOnlineStatus,
+} from "./socket/socketConversation.js";
 import redisService from "./services/RedisService.js";
 
 export const initializeSocket = async (io) => {
@@ -11,6 +14,10 @@ export const initializeSocket = async (io) => {
 
             await redisService.addUserSession(user.id, socket.id);
             await notifyConversationOnlineStatus(io, socket, true);
+
+            socket.on("conversation:request", (data) => {
+                void conversationRequest(io, socket, data);
+            });
 
             socket.on("disconnect", async () => {
                 await redisService.removeUserSession(user.id, socket.id);
